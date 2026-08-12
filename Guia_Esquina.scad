@@ -147,4 +147,8 @@ module corner_jig() {
     }
 }
 
+// Volteado para impresión (boca arriba / labio hacia arriba)
+translate([0, 0, jig_thickness])
+rotate([180, 0, 0])
 corner_jig();
+
