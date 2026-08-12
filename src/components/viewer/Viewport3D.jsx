@@ -62,7 +62,7 @@ export function Viewport3D({
     controlsRef.current = controls;
 
     // Iluminación de estudio
-    const hemiLight = new THREE.HemisphereLight(0xffffff, 0x334155, 1.4);
+    const hemiLight = new THREE.HemisphereLight(0xffffff, 0x475569, 1.5);
     hemiLight.position.set(0, 150, 0);
     scene.add(hemiLight);
 
@@ -76,6 +76,11 @@ export function Viewport3D({
     const dirLight2 = new THREE.DirectionalLight(0x93c5fd, 0.9);
     dirLight2.position.set(-100, 50, -100);
     scene.add(dirLight2);
+
+    // Luz de relleno interior suave para iluminar huecos y cavidades
+    const fillLight = new THREE.PointLight(0xffffff, 1.2, 500);
+    fillLight.position.set(0, 120, 0);
+    scene.add(fillLight);
 
     // Grid del suelo
     const grid = new THREE.GridHelper(250, 50, 0x3b82f6, 0x374151);
@@ -164,12 +169,12 @@ export function Viewport3D({
         dimensions: `${size.x.toFixed(1)} × ${size.z.toFixed(1)} × ${size.y.toFixed(1)} mm`,
       });
 
-      // Ajustar cámara para encuadrar la pieza correctamente
+      // Ajustar cámara para encuadrar la pieza y ver el interior del tubo desde arriba
       if (controlsRef.current) {
         const maxDim = Math.max(size.x, size.y, size.z);
-        const distance = maxDim * 2.0;
+        const distance = maxDim * 2.1;
         const camera = controlsRef.current.object;
-        camera.position.set(distance * 0.9, distance * 0.9, distance * 0.9);
+        camera.position.set(distance * 0.7, distance * 1.1, distance * 0.7);
         controlsRef.current.target.set(0, size.y / 2, 0);
         controlsRef.current.update();
       }
