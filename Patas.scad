@@ -4,8 +4,11 @@
 // =================================================================
 
 /* [Parámetros del Palo] */
-// @studio {"label":"Diámetro del palo","description":"Diámetro del palo de madera en mm (ej. 22.5 para palo de 22mm con holgura)","unit":"mm","group":"Palo"}
-pole_diameter = 22.5; // [15:0.5:50]
+// @studio {"label":"Diámetro nominal del palo","description":"Diámetro medido del palo de madera con calibre en mm","unit":"mm","group":"Palo"}
+pole_diameter = 22.0; // [15:0.5:50]
+
+// @studio {"label":"Holgura del palo (Tolerancia)","description":"Espacio diametral adicional (+0.4mm recomendado para deslizamiento FDM)","unit":"mm","group":"Palo"}
+pole_clearance = 0.4; // [0.1:0.05:1.0]
 
 // @studio {"label":"Profundidad de inserción","description":"Altura del tubo receptor del palo","unit":"mm","group":"Palo"}
 socket_height = 45; // [25:1:80]
@@ -64,7 +67,8 @@ $fn = 80;
 num_screws = 4; // 4 tornillos de montaje en cruz
 
 // Variables calculadas
-r_pole = pole_diameter / 2;
+actual_pole_d = pole_diameter + pole_clearance;
+r_pole = actual_pole_d / 2;
 r_outer = r_pole + wall_thickness;
 base_size = pole_diameter + base_margin;
 half_base = base_size / 2;
@@ -132,7 +136,7 @@ module leg_socket() {
         rotate([0, leg_angle, 0])
         cylinder(h = socket_height + 10, r = r_pole);
 
-        // B. Chaflán de entrada superior
+        // B. Chaflán de entrada superior para facilitar meter el palo
         translate([0, 0, base_thickness])
         rotate([0, leg_angle, 0])
         translate([0, 0, socket_height - 3])
@@ -155,14 +159,16 @@ module leg_socket() {
             }
         }
 
-        // D. Orificio para tornillo lateral inferior
+        // D. Orificio para tornillo prisionero lateral (opresor del palo)
         if (side_screw) {
             translate([0, 0, base_thickness])
             rotate([0, leg_angle, 0])
             translate([0, 0, socket_height / 2])
             rotate([0, 90, 0]) {
+                // Paso pasante del vástago del tornillo
                 cylinder(h = r_outer + 10, d = side_screw_diameter);
 
+                // Avellanado cónico adaptativo para la cabeza del tornillo
                 if (side_countersink) {
                     translate([0, 0, r_outer - head_depth_side])
                     cylinder(h = head_depth_side + 2, d1 = side_screw_diameter, d2 = side_screw_diameter + (head_depth_side * 2));
@@ -170,15 +176,17 @@ module leg_socket() {
             }
         }
 
-        // D2. Segundo tornillo lateral cruzado
+        // D2. Segundo tornillo transversal, a otra altura y girado 90°
         if (second_side_screw) {
             translate([0, 0, base_thickness])
             rotate([0, leg_angle, 0])
             translate([0, 0, second_screw_height])
             rotate([0, 0, second_screw_angle])
             rotate([0, 90, 0]) {
+                // Paso pasante del segundo tornillo
                 cylinder(h = r_outer + 10, d = side_screw_diameter);
 
+                // Avellanado cónico adaptativo para la cabeza del tornillo
                 if (side_countersink) {
                     translate([0, 0, r_outer - head_depth_side])
                     cylinder(h = head_depth_side + 2, d1 = side_screw_diameter, d2 = side_screw_diameter + (head_depth_side * 2));

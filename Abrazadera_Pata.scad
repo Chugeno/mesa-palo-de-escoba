@@ -6,15 +6,21 @@
 // =================================================================
 
 /* [Parámetros de la Pata (Macho)] */
-// @studio {"label":"Diámetro de la pata","description":"Diámetro exterior del palo de la pata de la mesa","unit":"mm","group":"Pata"}
-pole_diameter = 22.5; // [15:0.5:50]
+// @studio {"label":"Diámetro nominal de la pata","description":"Diámetro medido del palo de la pata con calibre en mm","unit":"mm","group":"Pata"}
+pole_diameter = 22.0; // [15:0.5:50]
+
+// @studio {"label":"Holgura de la pata (Tolerancia)","description":"Espacio diametral adicional para deslizar suave por la pata","unit":"mm","group":"Pata"}
+pole_clearance = 0.4; // [0.1:0.05:1.0]
 
 // @studio {"label":"Inclinación de la pata","description":"Ángulo de la pata respecto a la vertical (para auto-nivelar el refuerzo)","unit":"deg","group":"Pata"}
 leg_angle = 10; // [0:1:20]
 
 /* [Parámetros del Palo de la X (Refuerzo)] */
-// @studio {"label":"Diámetro del palo de la X","description":"Diámetro del palo de refuerzo en X","unit":"mm","group":"Refuerzo X"}
-brace_diameter = 22.5; // [15:0.5:50]
+// @studio {"label":"Diámetro nominal del palo de la X","description":"Diámetro medido del palo de refuerzo en mm","unit":"mm","group":"Refuerzo X"}
+brace_diameter = 22.0; // [15:0.5:50]
+
+// @studio {"label":"Holgura del refuerzo (Tolerancia)","description":"Espacio diametral adicional para el palo de la X","unit":"mm","group":"Refuerzo X"}
+brace_clearance = 0.4; // [0.1:0.05:1.0]
 
 // @studio {"label":"Profundidad de inserción","description":"Largo del tubo receptor para el palo de la X","unit":"mm","group":"Refuerzo X"}
 socket_length = 35; // [20:1:60]
@@ -39,9 +45,12 @@ countersink = true;
 /* [Detalles y Calidad] */
 $fn = 80;
 
-// Variables calculadas
-r_pole = pole_diameter / 2;
-r_brace = brace_diameter / 2;
+// Variables calculadas con holgura
+actual_pole_d = pole_diameter + pole_clearance;
+actual_brace_d = brace_diameter + brace_clearance;
+
+r_pole = actual_pole_d / 2;
+r_brace = actual_brace_d / 2;
 
 r_outer_clamp = r_pole + wall_thickness;
 r_outer_socket = r_brace + wall_thickness;
@@ -89,7 +98,7 @@ module leg_clamp() {
 
         // --- SUBTRACCIONES / PERFORACIONES ---
 
-        // A. Agujero pasante principal para la pata de la mesa
+        // A. Agujero pasante principal para la pata de la mesa (con holgura)
         cylinder(h = clamp_height + 10, r = r_pole, center = true);
 
         // B. Tornillo de fijación inferior 1 (Entra desde el lado opuesto en +X, a 0° de rotación)
@@ -102,7 +111,7 @@ module leg_clamp() {
         rotate([-90, 0, 0])
         wood_screw_hole(leg_screw_diameter, head_depth_leg);
 
-        // D. Hueco interior del socket de la X
+        // D. Hueco interior del socket de la X (con holgura)
         rotate([0, -socket_angle, 0])
         translate([-(socket_length / 2 + r_pole), 0, 0])
         rotate([0, 90, 0])

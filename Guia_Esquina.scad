@@ -18,8 +18,11 @@ table_lip_height = 20; // [10:1:45]
 table_lip_thickness = 5; // [3:1:10]
 
 /* [Parámetros de la Brida (Coincidentes con Patas.scad)] */
-// @studio {"label":"Diámetro del palo","description":"Mismo valor configurado en Patas.scad","unit":"mm","group":"Soporte"}
-pole_diameter = 22.5; // [15:0.5:50]
+// @studio {"label":"Diámetro nominal del palo","description":"Diámetro medido del palo con calibre en mm","unit":"mm","group":"Soporte"}
+pole_diameter = 22.0; // [15:0.5:50]
+
+// @studio {"label":"Holgura del palo","description":"Holgura diametral configurada en Patas.scad","unit":"mm","group":"Soporte"}
+pole_clearance = 0.4; // [0.1:0.05:1.0]
 
 // @studio {"label":"Margen base respecto al palo","description":"Mismo valor configurado en Patas.scad","unit":"mm","group":"Soporte"}
 base_margin = 52.5; // [30:0.5:80]
@@ -34,7 +37,7 @@ key_chamfer = 18; // [8:1:35]
 chamfer_radius = 4; // [1:0.5:10]
 
 /* [Ajuste y Estructura de la Guía] */
-// @studio {"label":"Holgura de encastre (Tolerancia)","description":"Holgura perimetral para encastrar la brida sin juego ni holgura excesiva","unit":"mm","group":"Guia"}
+// @studio {"label":"Holgura de encastre de la brida","description":"Holgura perimetral para encastrar la brida en el cajeado de la guía","unit":"mm","group":"Guia"}
 fit_clearance = 0.35; // [0.1:0.05:1.0]
 
 // @studio {"label":"Espesor de la placa de la guía","description":"Grosor de la base plana de la plantilla","unit":"mm","group":"Guia"}
@@ -85,17 +88,19 @@ module base_pocket_2d(size, r, c, r_ch, clearance = 0) {
     }
 }
 
-// Cuerpo plano 2D exterior de la plantilla
+// Cuerpo plano 2D exterior de la plantilla (Esquina viva a 90° perfecta en el vértice 0,0)
 module jig_body_2d() {
     hull() {
-        // Vértice interior de la esquina de la mesa
-        translate([4, 4]) circle(r = 4);
+        // Vértice exacto y nítido a 90° en la esquina de la mesa (0, 0)
+        translate([0, 0]) square([1, 1]);
 
-        // Extremo del brazo de apoyo en X
-        translate([arm_length_x - 8, 4]) circle(r = 4);
+        // Extremo del brazo de apoyo en X (borde recto en Y=0)
+        translate([arm_length_x - 6, 6]) circle(r = 6);
+        translate([arm_length_x - 6, 0]) square([6, 6]);
 
-        // Extremo del brazo de apoyo en Y
-        translate([4, arm_length_y - 8]) circle(r = 4);
+        // Extremo del brazo de apoyo en Y (borde recto en X=0)
+        translate([6, arm_length_y - 6]) circle(r = 6);
+        translate([0, arm_length_y - 6]) square([6, 6]);
 
         // Cuerpo envolvente que rodea el cajeado de la brida
         translate([center_x, center_y])
@@ -106,7 +111,7 @@ module jig_body_2d() {
 module corner_jig() {
     difference() {
         union() {
-            // 1. Placa base de referencia plana (apoya bajo la mesa en Z >= 0)
+            // 1. Placa base de referencia plana (apoya bajo la mesa en Z >= 0, esquina nítida a 90° en 0,0)
             linear_extrude(height = jig_thickness)
             jig_body_2d();
 
@@ -117,10 +122,6 @@ module corner_jig() {
             // 3. Labio / Tope contra el borde Y de la mesa (X <= 0, Z < 0)
             translate([-table_lip_thickness, -table_lip_thickness, -table_lip_height])
             cube([table_lip_thickness, arm_length_y + table_lip_thickness, table_lip_height + jig_thickness]);
-
-            // 4. Chaflán de refuerzo exterior en la esquina de los labios
-            translate([-table_lip_thickness, -table_lip_thickness, -table_lip_height])
-            cube([table_lip_thickness * 2, table_lip_thickness * 2, table_lip_height + jig_thickness]);
         }
 
         // --- SUBTRACCIONES / PERFORACIONES ---
@@ -147,8 +148,7 @@ module corner_jig() {
     }
 }
 
-// Volteado para impresión (boca arriba / labio hacia arriba)
+// Volteado para impresión (boca arriba / labio hacia arriba para imprimir sin soportes)
 translate([0, 0, jig_thickness])
 rotate([180, 0, 0])
 corner_jig();
-

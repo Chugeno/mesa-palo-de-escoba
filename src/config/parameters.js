@@ -43,12 +43,25 @@ export const PARAM_DEFINITIONS = [
   {
     id: 'pole_diameter',
     label: 'Diámetro del Palo',
-    description: 'Diámetro exterior de los palos de escoba en mm (con holgura)',
+    description: 'Diámetro exterior de los palos de escoba en mm (nominal)',
     unit: 'mm',
     min: 15,
     max: 40,
     step: 0.5,
-    defaultValue: 22.5,
+    defaultValue: 22.0,
+    isGlobal: true,
+    affects: ['patas', 'abrazadera', 'cruceta', 'guia'],
+    group: 'global',
+  },
+  {
+    id: 'pole_clearance',
+    label: 'Holgura del Palo',
+    description: 'Espacio diametral adicional para el deslizamiento del palo',
+    unit: 'mm',
+    min: 0.1,
+    max: 1.0,
+    step: 0.05,
+    defaultValue: 0.4,
     isGlobal: true,
     affects: ['patas', 'abrazadera', 'cruceta', 'guia'],
     group: 'global',
@@ -180,7 +193,20 @@ export const PARAM_DEFINITIONS = [
     min: 15,
     max: 40,
     step: 0.5,
-    defaultValue: 22.5,
+    defaultValue: 22.0,
+    isGlobal: false,
+    affects: ['abrazadera'],
+    group: 'abrazadera',
+  },
+  {
+    id: 'brace_clearance',
+    label: 'Holgura del Refuerzo (X)',
+    description: 'Espacio diametral adicional para el palo del refuerzo en X',
+    unit: 'mm',
+    min: 0.1,
+    max: 1.0,
+    step: 0.05,
+    defaultValue: 0.4,
     isGlobal: false,
     affects: ['abrazadera'],
     group: 'abrazadera',
@@ -309,6 +335,9 @@ export function generateDFlags(paramValues, fnValue = 24) {
   if (paramValues.pole_diameter !== undefined) {
     flags.push('-D', `pole_diameter=${paramValues.pole_diameter}`);
   }
+  if (paramValues.pole_clearance !== undefined) {
+    flags.push('-D', `pole_clearance=${paramValues.pole_clearance}`);
+  }
   if (paramValues.leg_angle !== undefined) {
     flags.push('-D', `leg_angle=${paramValues.leg_angle}`);
   }
@@ -333,6 +362,9 @@ export function generateDFlags(paramValues, fnValue = 24) {
   }
   if (paramValues.brace_diameter !== undefined) {
     flags.push('-D', `brace_diameter=${paramValues.brace_diameter}`);
+  }
+  if (paramValues.brace_clearance !== undefined) {
+    flags.push('-D', `brace_clearance=${paramValues.brace_clearance}`);
   }
   if (paramValues.socket_length !== undefined) {
     flags.push('-D', `socket_length=${paramValues.socket_length}`);

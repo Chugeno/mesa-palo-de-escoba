@@ -12,8 +12,11 @@ table_length = 1000;
 table_width = 600;
 
 /* [Parámetros de los Palos de Refuerzo] */
-// @studio {"label":"Diámetro del palo de la X","description":"Diámetro de los palos cruzados (con holgura incluida)","unit":"mm","group":"Palos X"}
-pole_diameter = 22.5; // [15:0.5:50]
+// @studio {"label":"Diámetro nominal del palo","description":"Diámetro medido del palo con calibre en mm","unit":"mm","group":"Palos X"}
+pole_diameter = 22.0; // [15:0.5:50]
+
+// @studio {"label":"Holgura del palo (Tolerancia)","description":"Espacio diametral adicional (+0.4mm recomendado)","unit":"mm","group":"Palos X"}
+pole_clearance = 0.4; // [0.1:0.05:1.0]
 
 // @studio {"label":"Largo de inserción (cada lado)","description":"Profundidad de cada manga/tubo de la cruceta desde el centro","unit":"mm","group":"Palos X"}
 socket_length = 40; // [20:1:80]
@@ -38,10 +41,11 @@ $fn = 80;
 // Ángulo de la diagonal (X) respecto al eje longitudinal (X) calculado directamente por proporción
 theta = atan2(table_width, table_length);
 
-// Variables físicas de la cruceta
-r_pole = pole_diameter / 2;
+// Variables físicas de la cruceta con holgura
+actual_pole_d = pole_diameter + pole_clearance;
+r_pole = actual_pole_d / 2;
 r_outer = r_pole + wall_thickness;
-z_offset = pole_diameter + wall_thickness + vertical_clearance;
+z_offset = actual_pole_d + wall_thickness + vertical_clearance;
 
 // Altura total de la pieza
 total_height = z_offset + r_outer * 2;
