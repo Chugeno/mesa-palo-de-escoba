@@ -1,46 +1,37 @@
 import { createOpenSCAD } from 'openscad-wasm';
 
-let instancePromise = null;
-
-async function getInstance() {
-  if (!instancePromise) {
-    instancePromise = createOpenSCAD();
-  }
-  return instancePromise;
-}
-
 self.onmessage = async (e) => {
-  const { id, pieceId, scadCode } = e.data;
+  const { id, pieceId, scadCode, dFlags = [] } = e.data;
 
   try {
-    const instance = await getInstance();
+    // Instanciar un nuevo runtime de OpenSCAD para cada compilación
+    // Esto garantiza aislamiento completo y evita excepciones de salida en Emscripten
+    const instance = await createOpenSCAD();
     const rawInstance = instance.getInstance ? instance.getInstance() : null;
 
-    let stlString;
-    if (rawInstance && rawInstance.FS && rawInstance.callMain) {
-      // Direct FS execution with manifold flag if available
-      const inPath = `/input_${pieceId}_${id}.scad`;
-      const outPath = `/output_${pieceId}_${id}.stl`;
-      
-      rawInstance.FS.writeFile(inPath, scadCode);
-      try {
-        rawInstance.callMain([inPath, '--backend=manifold', '-o', outPath]);
-      } catch (err) {
-        // Fallback without manifold if error
-        rawInstance.callMain([inPath, '-o', outPath]);
-      }
-      
-      stlString = rawInstance.FS.readFile(outPath, { encoding: 'utf8' });
-      
-      try {
-        rawInstance.FS.unlink(inPath);
-        rawInstance.FS.unlink(outPath);
-      } catch (cleanupErr) {
-        // ignore cleanup error
-      }
-    } else {
-      // Default wrapper execution
-      stlString = await instance.renderToStl(scadCode);
+    if (!rawInstance || !rawInstance.FS || !rawInstance.callMain) {
+      throw new Error('No se pudo inicializar el sistema de archivos de OpenSCAD');
+    }
+
+    const inPath = `/input_${pieceId}.scad`;
+    const outPath = `/output_${pieceId}.stl`;
+
+    // Escribir el código OpenSCAD original en el sistema de archivos virtual
+    rawInstance.FS.writeFile(inPath, scadCode);
+
+    // Ejecutar OpenSCAD con los flags -D para sobreescritura de parámetros
+    const args = [inPath, ...dFlags, '-o', outPath];
+    rawInstance.callMain(args);
+
+    // Leer el STL generado
+    const stlString = rawInstance.FS.readFile(outPath, { encoding: 'utf8' });
+
+    // Limpieza de archivos virtuales
+    try {
+      rawInstance.FS.unlink(inPath);
+      rawInstance.FS.unlink(outPath);
+    } catch (cleanupErr) {
+      // Ignorar errores de limpieza
     }
 
     self.postMessage({
@@ -55,7 +46,7 @@ self.onmessage = async (e) => {
       type: 'ERROR',
       id,
       pieceId,
-      error: error.message || String(error),
+      error: error?.message || String(error),
     });
   }
 };

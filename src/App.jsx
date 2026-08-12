@@ -4,14 +4,13 @@ import { ParameterSidebar } from './components/controls/ParameterSidebar';
 import { MultiViewport } from './components/viewer/MultiViewport';
 import {
   PIECES,
-  PARAM_DEFINITIONS,
   getDefaultParamValues,
-  injectParameters,
+  generateDFlags,
 } from './config/parameters';
 import { compileScadToStl } from './engine/scadCompiler';
 import { downloadStlFile, exportAllToZip } from './utils/exporter';
 
-// Importar directamente los archivos .scad como texto crudo (con soporte HMR en Vite)
+// Importar directamente los archivos .scad originales (con soporte HMR en Vite)
 import patasRaw from '../Patas.scad?raw';
 import abrazaderaRaw from '../Abrazadera_Pata.scad?raw';
 import crucetaRaw from '../Cruceta_Centro.scad?raw';
@@ -26,7 +25,7 @@ const SCAD_SOURCES = {
 
 export function App() {
   const [paramValues, setParamValues] = useState(getDefaultParamValues);
-  const [previewFn, setPreviewFn] = useState(26);
+  const [previewFn, setPreviewFn] = useState(24);
 
   const [renderedStls, setRenderedStls] = useState({
     patas: null,
@@ -52,7 +51,7 @@ export function App() {
   const [isExportingZip, setIsExportingZip] = useState(false);
   const debounceTimerRef = useRef(null);
 
-  // Compilar una pieza específica
+  // Compilar una pieza específica usando flags -D
   const compilePiece = useCallback(
     async (pieceId, values, fnVal) => {
       const rawCode = SCAD_SOURCES[pieceId];
@@ -61,10 +60,10 @@ export function App() {
       setLoadingStates((prev) => ({ ...prev, [pieceId]: true }));
       setErrors((prev) => ({ ...prev, [pieceId]: null }));
 
-      const fullCode = injectParameters(rawCode, values, fnVal);
+      const dFlags = generateDFlags(values, fnVal);
 
       try {
-        const { stlData } = await compileScadToStl(pieceId, fullCode);
+        const { stlData } = await compileScadToStl(pieceId, rawCode, dFlags);
         setRenderedStls((prev) => ({ ...prev, [pieceId]: stlData }));
       } catch (err) {
         console.error(`Error al compilar ${pieceId}:`, err);
@@ -76,7 +75,7 @@ export function App() {
     []
   );
 
-  // Compilar todas las piezas
+  // Compilar secuencialmente todas las piezas
   const compileAllPieces = useCallback(
     async (values, fnVal) => {
       const pieceIds = Object.keys(PIECES);
@@ -95,7 +94,7 @@ export function App() {
 
     debounceTimerRef.current = setTimeout(() => {
       compileAllPieces(paramValues, previewFn);
-    }, 250);
+    }, 200);
 
     return () => {
       if (debounceTimerRef.current) {

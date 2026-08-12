@@ -35,12 +35,13 @@ function getWorker() {
 }
 
 /**
- * Solicita la compilación de un código SCAD a STL
+ * Solicita la compilación de un código SCAD a STL usando flags -D
  * @param {string} pieceId Identificador de la pieza
- * @param {string} scadCode Código OpenSCAD con parámetros inyectados
+ * @param {string} scadCode Código OpenSCAD original
+ * @param {string[]} dFlags Argumentos de flags -D
  * @returns {Promise<{pieceId: string, stlData: string}>}
  */
-export function compileScadToStl(pieceId, scadCode) {
+export function compileScadToStl(pieceId, scadCode, dFlags = []) {
   return new Promise((resolve, reject) => {
     const worker = getWorker();
     const id = ++currentRequestId;
@@ -51,6 +52,7 @@ export function compileScadToStl(pieceId, scadCode) {
       id,
       pieceId,
       scadCode,
+      dFlags,
     });
   });
 }

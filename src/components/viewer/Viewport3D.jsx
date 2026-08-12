@@ -39,9 +39,9 @@ export function Viewport3D({
       45,
       container.clientWidth / container.clientHeight,
       0.1,
-      1000
+      2000
     );
-    camera.position.set(80, 80, 80);
+    camera.position.set(120, 120, 120);
 
     // Renderer
     const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
@@ -57,28 +57,28 @@ export function Viewport3D({
     const controls = new OrbitControls(camera, renderer.domElement);
     controls.enableDamping = true;
     controls.dampingFactor = 0.05;
-    controls.maxDistance = 600;
-    controls.minDistance = 10;
+    controls.maxDistance = 1000;
+    controls.minDistance = 5;
     controlsRef.current = controls;
 
-    // Iluminación
-    const hemiLight = new THREE.HemisphereLight(0xffffff, 0x444444, 1.2);
-    hemiLight.position.set(0, 100, 0);
+    // Iluminación de estudio
+    const hemiLight = new THREE.HemisphereLight(0xffffff, 0x334155, 1.4);
+    hemiLight.position.set(0, 150, 0);
     scene.add(hemiLight);
 
-    const dirLight1 = new THREE.DirectionalLight(0xffffff, 1.5);
-    dirLight1.position.set(60, 120, 80);
+    const dirLight1 = new THREE.DirectionalLight(0xffffff, 1.8);
+    dirLight1.position.set(100, 150, 100);
     dirLight1.castShadow = true;
     dirLight1.shadow.mapSize.width = 1024;
     dirLight1.shadow.mapSize.height = 1024;
     scene.add(dirLight1);
 
-    const dirLight2 = new THREE.DirectionalLight(0x60a5fa, 0.8);
-    dirLight2.position.set(-60, -40, -80);
+    const dirLight2 = new THREE.DirectionalLight(0x93c5fd, 0.9);
+    dirLight2.position.set(-100, 50, -100);
     scene.add(dirLight2);
 
     // Grid del suelo
-    const grid = new THREE.GridHelper(200, 40, 0x3b82f6, 0x374151);
+    const grid = new THREE.GridHelper(250, 50, 0x3b82f6, 0x374151);
     grid.position.y = 0;
     scene.add(grid);
     gridRef.current = grid;
@@ -122,18 +122,18 @@ export function Viewport3D({
       const geometry = loader.parse(stlData);
       geometry.computeVertexNormals();
 
-      // Bounding Box para centrado y estadísticas
+      // OpenSCAD genera geometrías en Z-Up. Rotamos -90° en X para alinear con Three.js Y-Up.
+      geometry.rotateX(-Math.PI / 2);
+
+      // Calcular caja envolvente y dimensiones
       geometry.computeBoundingBox();
       const bbox = geometry.boundingBox;
       const size = new THREE.Vector3();
       bbox.getSize(size);
-      const center = new THREE.Vector3();
-      bbox.getCenter(center);
 
-      // Centrar geometría en el origen y apoyarla sobre el suelo (Y=0)
+      // Centrar en X y Z, y asentar la base sobre el suelo (Y=0)
       geometry.center();
-      const minY = -size.y / 2;
-      geometry.translate(0, -minY, 0);
+      geometry.translate(0, size.y / 2, 0);
 
       // Eliminar malla previa
       if (meshRef.current) {
@@ -164,12 +164,12 @@ export function Viewport3D({
         dimensions: `${size.x.toFixed(1)} × ${size.z.toFixed(1)} × ${size.y.toFixed(1)} mm`,
       });
 
-      // Ajustar cámara para encuadrar la pieza
+      // Ajustar cámara para encuadrar la pieza correctamente
       if (controlsRef.current) {
         const maxDim = Math.max(size.x, size.y, size.z);
-        const distance = maxDim * 2.2;
+        const distance = maxDim * 2.0;
         const camera = controlsRef.current.object;
-        camera.position.set(distance * 0.8, distance * 0.9, distance * 0.8);
+        camera.position.set(distance * 0.9, distance * 0.9, distance * 0.9);
         controlsRef.current.target.set(0, size.y / 2, 0);
         controlsRef.current.update();
       }
@@ -191,9 +191,9 @@ export function Viewport3D({
       const size = new THREE.Vector3();
       meshRef.current.geometry.boundingBox.getSize(size);
       const maxDim = Math.max(size.x, size.y, size.z);
-      const distance = maxDim * 2.2;
+      const distance = maxDim * 2.0;
       const camera = controlsRef.current.object;
-      camera.position.set(distance * 0.8, distance * 0.9, distance * 0.8);
+      camera.position.set(distance * 0.9, distance * 0.9, distance * 0.9);
       controlsRef.current.target.set(0, size.y / 2, 0);
       controlsRef.current.update();
     }

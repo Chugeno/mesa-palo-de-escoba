@@ -1,5 +1,5 @@
 import JSZip from 'jszip';
-import { PIECES, injectParameters } from '../config/parameters';
+import { PIECES, generateDFlags } from '../config/parameters';
 import { compileScadToStl } from '../engine/scadCompiler';
 
 /**
@@ -28,6 +28,7 @@ export async function exportAllToZip({
 }) {
   const zip = new JSZip();
   const pieces = Object.values(PIECES);
+  const dFlags = generateDFlags(paramValues, highQualityFn);
 
   for (let i = 0; i < pieces.length; i++) {
     const piece = pieces[i];
@@ -42,11 +43,8 @@ export async function exportAllToZip({
     const rawCode = scadSources[piece.id];
     if (!rawCode) continue;
 
-    // Inyectar parámetros con alta resolución para la impresión 3D
-    const fullScadCode = injectParameters(rawCode, paramValues, highQualityFn);
-
     try {
-      const { stlData } = await compileScadToStl(piece.id, fullScadCode);
+      const { stlData } = await compileScadToStl(piece.id, rawCode, dFlags);
       zip.file(piece.exportName, stlData);
     } catch (err) {
       console.error(`Error al exportar ${piece.name}:`, err);

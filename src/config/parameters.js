@@ -298,73 +298,69 @@ export function getDefaultParamValues() {
 }
 
 /**
- * Prepara el código SCAD inyectando los parámetros en la cabecera
- * @param {string} rawScadCode Código SCAD original
+ * Genera el array de argumentos `-D` para OpenSCAD CLI
  * @param {Object} paramValues Valores actuales de los parámetros
- * @param {number} fnValue Valor de resolución geométrica $fn (ej: 28 para preview rápido, 80 para export)
- * @returns {string} Código SCAD modificado listo para compilar
+ * @param {number} fnValue Valor de resolución geométrica $fn
+ * @returns {string[]} Array de flags ['-D', 'var=val', ...]
  */
-export function injectParameters(rawScadCode, paramValues, fnValue = 28) {
-  let overrides = `// --- OVERRIDES PARAMÉTRICOS DINÁMICOS ---\n`;
-  overrides += `$fn = ${fnValue};\n`;
+export function generateDFlags(paramValues, fnValue = 24) {
+  const flags = ['-D', `$fn=${fnValue}`];
 
-  // Mapeos específicos si el nombre de variable en SCAD difiere
   if (paramValues.pole_diameter !== undefined) {
-    overrides += `pole_diameter = ${paramValues.pole_diameter};\n`;
+    flags.push('-D', `pole_diameter=${paramValues.pole_diameter}`);
   }
   if (paramValues.leg_angle !== undefined) {
-    overrides += `leg_angle = ${paramValues.leg_angle};\n`;
+    flags.push('-D', `leg_angle=${paramValues.leg_angle}`);
   }
   if (paramValues.wall_thickness !== undefined) {
-    overrides += `wall_thickness = ${paramValues.wall_thickness};\n`;
+    flags.push('-D', `wall_thickness=${paramValues.wall_thickness}`);
   }
   if (paramValues.screw_diameter !== undefined) {
-    overrides += `screw_diameter = ${paramValues.screw_diameter};\n`;
-    overrides += `leg_screw_diameter = ${paramValues.screw_diameter};\n`;
+    flags.push('-D', `screw_diameter=${paramValues.screw_diameter}`);
+    flags.push('-D', `leg_screw_diameter=${paramValues.screw_diameter}`);
   }
   if (paramValues.base_margin !== undefined) {
-    overrides += `base_margin = ${paramValues.base_margin};\n`;
+    flags.push('-D', `base_margin=${paramValues.base_margin}`);
   }
   if (paramValues.socket_height !== undefined) {
-    overrides += `socket_height = ${paramValues.socket_height};\n`;
+    flags.push('-D', `socket_height=${paramValues.socket_height}`);
   }
   if (paramValues.side_screw !== undefined) {
-    overrides += `side_screw = ${paramValues.side_screw};\n`;
+    flags.push('-D', `side_screw=${paramValues.side_screw ? 'true' : 'false'}`);
   }
   if (paramValues.second_side_screw !== undefined) {
-    overrides += `second_side_screw = ${paramValues.second_side_screw};\n`;
+    flags.push('-D', `second_side_screw=${paramValues.second_side_screw ? 'true' : 'false'}`);
   }
   if (paramValues.brace_diameter !== undefined) {
-    overrides += `brace_diameter = ${paramValues.brace_diameter};\n`;
+    flags.push('-D', `brace_diameter=${paramValues.brace_diameter}`);
   }
   if (paramValues.socket_length !== undefined) {
-    overrides += `socket_length = ${paramValues.socket_length};\n`;
+    flags.push('-D', `socket_length=${paramValues.socket_length}`);
   }
   if (paramValues.clamp_height !== undefined) {
-    overrides += `clamp_height = ${paramValues.clamp_height};\n`;
+    flags.push('-D', `clamp_height=${paramValues.clamp_height}`);
   }
   if (paramValues.table_length !== undefined) {
-    overrides += `table_length = ${paramValues.table_length};\n`;
+    flags.push('-D', `table_length=${paramValues.table_length}`);
   }
   if (paramValues.table_width !== undefined) {
-    overrides += `table_width = ${paramValues.table_width};\n`;
+    flags.push('-D', `table_width=${paramValues.table_width}`);
   }
   if (paramValues.vertical_clearance !== undefined) {
-    overrides += `vertical_clearance = ${paramValues.vertical_clearance};\n`;
+    flags.push('-D', `vertical_clearance=${paramValues.vertical_clearance}`);
   }
   if (paramValues.edge_offset_x !== undefined) {
-    overrides += `edge_offset_x = ${paramValues.edge_offset_x};\n`;
+    flags.push('-D', `edge_offset_x=${paramValues.edge_offset_x}`);
   }
   if (paramValues.edge_offset_y !== undefined) {
-    overrides += `edge_offset_y = ${paramValues.edge_offset_y};\n`;
+    flags.push('-D', `edge_offset_y=${paramValues.edge_offset_y}`);
   }
   if (paramValues.table_lip_height !== undefined) {
-    overrides += `table_lip_height = ${paramValues.table_lip_height};\n`;
+    flags.push('-D', `table_lip_height=${paramValues.table_lip_height}`);
   }
   if (paramValues.fit_clearance !== undefined) {
-    overrides += `fit_clearance = ${paramValues.fit_clearance};\n`;
+    flags.push('-D', `fit_clearance=${paramValues.fit_clearance}`);
   }
 
-  // Prepend overrides before the original code
-  return `${overrides}\n// --- CÓDIGO BASE ---\n${rawScadCode}`;
+  return flags;
 }
