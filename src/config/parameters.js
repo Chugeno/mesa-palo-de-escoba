@@ -329,7 +329,7 @@ export function getDefaultParamValues() {
  * @param {number} fnValue Valor de resolución geométrica $fn
  * @returns {string[]} Array de flags ['-D', 'var=val', ...]
  */
-export function generateDFlags(paramValues, fnValue = 24) {
+export function generateDFlags(paramValues, fnValue = 36) {
   const flags = ['-D', `$fn=${fnValue}`];
 
   if (paramValues.pole_diameter !== undefined) {

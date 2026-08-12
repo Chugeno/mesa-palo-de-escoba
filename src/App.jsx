@@ -25,7 +25,7 @@ const SCAD_SOURCES = {
 
 export function App() {
   const [paramValues, setParamValues] = useState(getDefaultParamValues);
-  const [previewFn, setPreviewFn] = useState(24);
+  const [previewFn, setPreviewFn] = useState(36);
 
   const [renderedStls, setRenderedStls] = useState({
     patas: null,
