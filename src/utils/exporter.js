@@ -1,0 +1,71 @@
+import JSZip from 'jszip';
+import { PIECES, injectParameters } from '../config/parameters';
+import { compileScadToStl } from '../engine/scadCompiler';
+
+/**
+ * Descarga un archivo STL individual directamente en el navegador
+ */
+export function downloadStlFile(stlString, fileName) {
+  const blob = new Blob([stlString], { type: 'model/stl' });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = fileName;
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  URL.revokeObjectURL(url);
+}
+
+/**
+ * Compila y empaqueta las 4 piezas en un archivo ZIP de alta calidad ($fn = 80)
+ */
+export async function exportAllToZip({
+  scadSources,
+  paramValues,
+  highQualityFn = 80,
+  onProgress,
+}) {
+  const zip = new JSZip();
+  const pieces = Object.values(PIECES);
+
+  for (let i = 0; i < pieces.length; i++) {
+    const piece = pieces[i];
+    if (onProgress) {
+      onProgress({
+        current: i + 1,
+        total: pieces.length,
+        pieceName: piece.name,
+      });
+    }
+
+    const rawCode = scadSources[piece.id];
+    if (!rawCode) continue;
+
+    // Inyectar parámetros con alta resolución para la impresión 3D
+    const fullScadCode = injectParameters(rawCode, paramValues, highQualityFn);
+
+    try {
+      const { stlData } = await compileScadToStl(piece.id, fullScadCode);
+      zip.file(piece.exportName, stlData);
+    } catch (err) {
+      console.error(`Error al exportar ${piece.name}:`, err);
+      throw new Error(`Error al compilar ${piece.name}: ${err.message}`);
+    }
+  }
+
+  // Generar archivo ZIP
+  const zipBlob = await zip.generateAsync({ type: 'blob' });
+  const poleD = paramValues.pole_diameter || 22.5;
+  const zipFileName = `Mesa_Escoba_STLs_D${poleD}mm.zip`;
+
+  // Disparar descarga
+  const url = URL.createObjectURL(zipBlob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = zipFileName;
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  URL.revokeObjectURL(url);
+}
