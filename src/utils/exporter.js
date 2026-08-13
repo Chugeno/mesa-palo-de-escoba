@@ -46,13 +46,15 @@ export async function exportAllToZip({
   const zip = new JSZip();
   const pieces = Object.values(PIECES);
   const dFlags = generateDFlags(paramValues, highQualityFn);
-  let completedCount = 0;
+  const completedIds = new Set();
+  const runningIds = new Set(pieces.map((p) => p.id));
 
   if (onProgress) {
     onProgress({
-      current: 1,
+      completedCount: 0,
       total: pieces.length,
-      pieceName: 'Compilando en paralelo...',
+      completedIds: Array.from(completedIds),
+      runningIds: Array.from(runningIds),
       isZipping: false,
     });
   }
@@ -65,13 +67,16 @@ export async function exportAllToZip({
       try {
         const { stlData } = await compileScadToStl(piece.id, rawCode, dFlags);
         zip.file(piece.exportName, stlData);
-        completedCount++;
+        completedIds.add(piece.id);
+        runningIds.delete(piece.id);
+
         if (onProgress) {
           onProgress({
-            current: Math.min(completedCount + 1, pieces.length),
+            completedCount: completedIds.size,
             total: pieces.length,
-            pieceName: piece.name,
-            isZipping: completedCount === pieces.length,
+            completedIds: Array.from(completedIds),
+            runningIds: Array.from(runningIds),
+            isZipping: completedIds.size === pieces.length,
           });
         }
       } catch (err) {
@@ -84,9 +89,10 @@ export async function exportAllToZip({
   // Notificar que se está generando el ZIP
   if (onProgress) {
     onProgress({
-      current: pieces.length,
+      completedCount: pieces.length,
       total: pieces.length,
-      pieceName: 'Comprimiendo archivo ZIP...',
+      completedIds: Array.from(completedIds),
+      runningIds: [],
       isZipping: true,
     });
   }

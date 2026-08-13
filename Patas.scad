@@ -66,7 +66,7 @@ $fn = 80;
 // Constantes fijas de diseño
 num_screws = 4; // 4 tornillos de montaje en cruz
 
-// Variables calculadas
+// Variables calculadas y límites de seguridad
 actual_pole_d = pole_diameter + pole_clearance;
 r_pole = actual_pole_d / 2;
 r_outer = r_pole + wall_thickness;
@@ -78,60 +78,70 @@ head_depth_base = min(base_thickness * 0.5, screw_diameter * 0.6);
 head_depth_side = min(wall_thickness * 0.65, 3.0);
 
 // Perfil 2D de la base: Cuadrado con 3 esquinas redondeadas y 1 diagonal con puntas redondeadas
+// Con límites de seguridad para evitar auto-intersecciones en cualquier rango de sliders
 module base_plate_2d(size, r, c, r_ch) {
     half = size / 2;
-    k_offset = (sqrt(2) - 1) * r_ch; // Compensación trigonométrica para tangencia exacta
+    safe_r = min(r, half * 0.35);
+    safe_c = min(c, half * 0.6);
+    safe_r_ch = min(r_ch, safe_c * 0.35);
+    k_offset = (sqrt(2) - 1) * safe_r_ch;
     
     hull() {
-        // Esquina 1 (+X, +Y): Dos círculos tangentes que redondean ambos extremos de la diagonal
-        translate([half - c - k_offset, half - r_ch]) circle(r = r_ch);
-        translate([half - r_ch, half - c - k_offset]) circle(r = r_ch);
+        // Esquina 1 (+X, +Y): Dos círculos tangentes del corte diagonal
+        translate([half - safe_c - k_offset, half - safe_r_ch]) circle(r = safe_r_ch);
+        translate([half - safe_r_ch, half - safe_c - k_offset]) circle(r = safe_r_ch);
         
         // Esquinas 2, 3 y 4: Redondeos estándar
-        translate([-half + r,  half - r]) circle(r = r); // Esquina -X, +Y
-        translate([-half + r, -half + r]) circle(r = r); // Esquina -X, -Y
-        translate([ half - r, -half + r]) circle(r = r); // Esquina +X, -Y
+        translate([-half + safe_r,  half - safe_r]) circle(r = safe_r);
+        translate([-half + safe_r, -half + safe_r]) circle(r = safe_r);
+        translate([ half - safe_r, -half + safe_r]) circle(r = safe_r);
     }
 }
 
 module leg_socket() {
     difference() {
         union() {
-            // 1. Placa base cuadrada con llave diagonal y puntas redondeadas
+            // 1. Placa base cuadrada con llave diagonal
             linear_extrude(height = base_thickness)
             base_plate_2d(base_size, corner_radius, key_chamfer, chamfer_radius);
 
-            // 2. Tubo receptor inclinado
+            // 2. Collar cilíndrico vertical en la base (anclaje masivo que sella la unión con la placa)
+            cylinder(h = base_thickness + 3, r = r_outer + 2);
+
+            // 3. Tubo receptor inclinado en su posición final
             translate([0, 0, base_thickness])
             rotate([0, leg_angle, 0])
             cylinder(h = socket_height, r = r_outer);
 
-            // 3. Collar de refuerzo cónico en la base
-            translate([0, 0, base_thickness])
-            rotate([0, leg_angle, 0])
-            cylinder(h = 6, r1 = r_outer + 2.5, r2 = r_outer);
-
             // 4. 4 Ménsulas de refuerzo sólidas y limpias hacia las esquinas
+            // Geometría 2D convexa extruida: Cero errores CSG, ultra-rápida y robusta
+            R_rib = max(r_outer + 5, half_base - 8);
+            H_rib = base_thickness + socket_height * 0.55;
+            
+            rib_points = [
+                [0, 0],
+                [0, H_rib],
+                [r_outer, H_rib],
+                [R_rib, base_thickness],
+                [R_rib, 0]
+            ];
+
             for (i = [0 : num_screws - 1]) {
-                a = (i + 0.5) * (360 / num_screws);
+                a = (i + 0.5) * (360 / num_screws); // Alternados a 45°, 135°, 225°, 315°
                 rotate([0, 0, a])
-                translate([0, -wall_thickness/2, base_thickness])
-                rotate([90, 0, 90])
-                linear_extrude(height = half_base - 8)
-                polygon([
-                    [0, 0],
-                    [0, socket_height * 0.5],
-                    [(half_base - 8) - r_outer, 0]
-                ]);
+                rotate([90, 0, 0])
+                linear_extrude(height = wall_thickness, center = true)
+                polygon(rib_points);
             }
         }
 
         // --- SUBTRACCIONES / PERFORACIONES ---
 
-        // A. Hueco interior para el palo
+        // A. Hueco interior para el palo (con margen de 0.5mm abajo para evitar membranas)
         translate([0, 0, base_thickness])
         rotate([0, leg_angle, 0])
-        cylinder(h = socket_height + 10, r = r_pole);
+        translate([0, 0, -0.5])
+        cylinder(h = socket_height + 15, r = r_pole);
 
         // B. Chaflán de entrada superior para facilitar meter el palo
         translate([0, 0, base_thickness])
@@ -140,18 +150,18 @@ module leg_socket() {
         cylinder(h = 4, r1 = r_pole, r2 = r_pole + 1.5);
 
         // C. 4 Orificios para tornillos de mesa centrados en los 4 lados planos
-        screw_pos = half_base - (screw_diameter * 1.8);
+        screw_pos = max(r_outer + screw_diameter + 1, half_base - (screw_diameter * 1.8));
         for (i = [0 : num_screws - 1]) {
             angle = i * (360 / num_screws);
             rotate([0, 0, angle])
             translate([screw_pos, 0, -1]) {
-                // Pasante
+                // Pasante con holgura en Z para corte limpio
                 cylinder(h = base_thickness + 4, d = screw_diameter);
                 
-                // Avellanado seguro
+                // Cabeza avellanada cónica segura
                 if (countersink) {
                     translate([0, 0, 1 + base_thickness - head_depth_base])
-                    cylinder(h = head_depth_base + 0.5, d1 = screw_diameter, d2 = screw_diameter + (head_depth_base * 2));
+                    cylinder(h = head_depth_base + 1, d1 = screw_diameter, d2 = screw_diameter + (head_depth_base * 2));
                 }
             }
         }
@@ -163,12 +173,12 @@ module leg_socket() {
             translate([0, 0, socket_height / 2])
             rotate([0, 90, 0]) {
                 // Paso pasante del vástago del tornillo
-                cylinder(h = r_outer + 10, d = side_screw_diameter);
+                cylinder(h = r_outer + 15, d = side_screw_diameter);
 
                 // Avellanado cónico adaptativo para la cabeza del tornillo
                 if (side_countersink) {
                     translate([0, 0, r_outer - head_depth_side])
-                    cylinder(h = head_depth_side + 2, d1 = side_screw_diameter, d2 = side_screw_diameter + (head_depth_side * 2));
+                    cylinder(h = head_depth_side + 5, d1 = side_screw_diameter, d2 = side_screw_diameter + (head_depth_side * 2));
                 }
             }
         }
@@ -181,15 +191,19 @@ module leg_socket() {
             rotate([0, 0, second_screw_angle])
             rotate([0, 90, 0]) {
                 // Paso pasante del segundo tornillo
-                cylinder(h = r_outer + 10, d = side_screw_diameter);
+                cylinder(h = r_outer + 15, d = side_screw_diameter);
 
                 // Avellanado cónico adaptativo para la cabeza del tornillo
                 if (side_countersink) {
                     translate([0, 0, r_outer - head_depth_side])
-                    cylinder(h = head_depth_side + 2, d1 = side_screw_diameter, d2 = side_screw_diameter + (head_depth_side * 2));
+                    cylinder(h = head_depth_side + 5, d1 = side_screw_diameter, d2 = side_screw_diameter + (head_depth_side * 2));
                 }
             }
         }
+
+        // E. Plano de corte inferior perfectamente rasante a la mesa (Z < 0)
+        translate([-(base_size * 2), -(base_size * 2), -50])
+        cube([base_size * 4, base_size * 4, 50]);
     }
 }
 

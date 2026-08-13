@@ -46,8 +46,8 @@ jig_thickness = 6; // [4:1:12]
 // @studio {"label":"Margen estructural alrededor del cajeado","description":"Espesor del marco que rodea el encastre","unit":"mm","group":"Guia"}
 frame_margin = 12; // [8:1:25]
 
-// @studio {"label":"Orientación de la pata","description":"225° apunta la inclinación de la pata directo hacia la esquina de la mesa","unit":"deg","group":"Guia"}
-bracket_angle = 225; // [0:15:360]
+// @studio {"label":"Orientación de la pata","description":"135° orienta la inclinación de la pata directo hacia la esquina de la mesa","unit":"deg","group":"Guia"}
+bracket_angle = 135; // [0:15:360]
 
 /* [Detalles y Calidad] */
 $fn = 80;

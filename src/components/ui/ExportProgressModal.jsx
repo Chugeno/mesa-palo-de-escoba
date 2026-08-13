@@ -6,8 +6,15 @@ export function ExportProgressModal({ progress, onClose }) {
   if (!progress) return null;
 
   const piecesList = Object.values(PIECES);
-  const { current, total, pieceName, isZipping } = progress;
-  const percent = isZipping ? 98 : Math.round(((current - 0.5) / total) * 100);
+  const {
+    completedCount = 0,
+    total = piecesList.length,
+    completedIds = [],
+    runningIds = [],
+    isZipping = false,
+  } = progress;
+
+  const percent = isZipping ? 98 : Math.round((completedCount / total) * 100);
 
   return (
     <div className="export-modal-overlay">
@@ -17,9 +24,9 @@ export function ExportProgressModal({ progress, onClose }) {
             <Sparkles size={20} />
           </div>
           <div>
-            <h3 className="export-modal-title">Exportando Todo en Alta Calidad</h3>
+            <h3 className="export-modal-title">Exportación Multi-Hilo en Paralelo</h3>
             <p className="export-modal-subtitle">
-              Calculando curvas y círculos perfectos ($fn = 80)
+              Compilando 4 piezas simultáneamente en alta resolución ($fn = 80)
             </p>
           </div>
         </div>
@@ -30,7 +37,9 @@ export function ExportProgressModal({ progress, onClose }) {
             <span className="export-status-text">
               {isZipping
                 ? 'Empaquetando archivo comprimido ZIP...'
-                : `Procesando: ${pieceName} (${current} de ${total})`}
+                : runningIds.length > 0
+                ? `Procesando ${runningIds.length} pieza(s) en paralelo (${completedCount} de ${total} listas)`
+                : 'Finalizando generación...'}
             </span>
             <span className="export-percent-badge">{percent}%</span>
           </div>
@@ -43,13 +52,11 @@ export function ExportProgressModal({ progress, onClose }) {
           </div>
         </div>
 
-        {/* Lista de piezas con sus estados reales */}
+        {/* Lista de piezas con sus estados reales simultáneos */}
         <div className="export-pieces-list">
-          {piecesList.map((piece, index) => {
-            const stepNum = index + 1;
-            const isCompleted = stepNum < current || isZipping;
-            const isCurrent = stepNum === current && !isZipping;
-            const isPending = stepNum > current;
+          {piecesList.map((piece) => {
+            const isCompleted = completedIds.includes(piece.id) || isZipping;
+            const isRunning = runningIds.includes(piece.id) && !isZipping;
 
             return (
               <div
@@ -57,7 +64,7 @@ export function ExportProgressModal({ progress, onClose }) {
                 className={`export-piece-item ${
                   isCompleted
                     ? 'completed'
-                    : isCurrent
+                    : isRunning
                     ? 'active'
                     : 'pending'
                 }`}
@@ -65,7 +72,7 @@ export function ExportProgressModal({ progress, onClose }) {
                 <div className="export-piece-status-icon">
                   {isCompleted ? (
                     <CheckCircle2 size={16} className="text-success" />
-                  ) : isCurrent ? (
+                  ) : isRunning ? (
                     <Loader2 size={16} className="text-primary spin-icon" />
                   ) : (
                     <Clock size={16} className="text-muted" />
@@ -78,7 +85,7 @@ export function ExportProgressModal({ progress, onClose }) {
                 </div>
 
                 <div className="export-piece-badge">
-                  {isCompleted ? 'Listo' : isCurrent ? 'Compilando...' : 'En cola'}
+                  {isCompleted ? 'Listo' : isRunning ? 'Procesando en CPU...' : 'En cola'}
                 </div>
               </div>
             );
