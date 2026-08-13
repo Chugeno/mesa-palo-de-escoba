@@ -179,10 +179,10 @@ export function ParameterSidebar({
 
           <ParamSlider
             label="Resolución Rápida ($fn)"
-            description="Valores más bajos (20-30) actualizan más rápido en tiempo real. La exportación final siempre usa alta definición ($fn=80)."
-            min={16}
-            max={60}
-            step={2}
+            description="Valores entre 28-36 actualizan en tiempo real. La exportación final siempre usa máxima definición ($fn=80)."
+            min={28}
+            max={64}
+            step={4}
             value={previewFn}
             onChange={onPreviewFnChange}
           />

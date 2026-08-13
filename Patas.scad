@@ -114,17 +114,17 @@ module leg_socket() {
             for (i = [0 : num_screws - 1]) {
                 a = (i + 0.5) * (360 / num_screws); // Alternados a 45°, 135°, 225°, 315°
                 hull() {
-                    // Anclaje en el tubo inclinado
+                    // Anclaje en el tubo inclinado (inmerso)
                     translate([0, 0, base_thickness])
                     rotate([0, leg_angle, 0])
                     rotate([0, 0, a])
-                    translate([r_outer - 1.5, -wall_thickness/2, 0])
-                        cube([2, wall_thickness, socket_height * 0.55]);
+                    translate([r_pole + 0.5, -wall_thickness/2, 0])
+                        cube([wall_thickness + 1, wall_thickness, socket_height * 0.55]);
 
-                    // Anclaje en la placa base
+                    // Anclaje en la placa base (inmerso)
                     rotate([0, 0, a])
-                    translate([half_base - 8, -wall_thickness/2, 0])
-                        cube([2, wall_thickness, base_thickness]);
+                    translate([half_base - 8, -wall_thickness/2, -0.5])
+                        cube([3, wall_thickness, base_thickness + 1]);
                 }
             }
         }
@@ -193,10 +193,6 @@ module leg_socket() {
                 }
             }
         }
-
-        // E. Plano de corte inferior perfectamente rasante a la mesa (Z < 0)
-        translate([-(base_size + 20), -(base_size + 20), -50])
-        cube([(base_size + 20) * 2, (base_size + 20) * 2, 50]);
     }
 }
 
