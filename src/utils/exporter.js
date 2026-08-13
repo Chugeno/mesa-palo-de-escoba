@@ -69,6 +69,16 @@ export async function exportAllToZip({
     }
   }
 
+  // Notificar que se está generando el ZIP
+  if (onProgress) {
+    onProgress({
+      current: pieces.length,
+      total: pieces.length,
+      pieceName: 'Comprimiendo archivo ZIP...',
+      isZipping: true,
+    });
+  }
+
   // Generar archivo ZIP
   const zipBlob = await zip.generateAsync({ type: 'blob' });
   const poleD = paramValues.pole_diameter || 22.5;

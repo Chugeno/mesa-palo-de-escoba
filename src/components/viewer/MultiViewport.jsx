@@ -7,6 +7,7 @@ export function MultiViewport({
   loadingStates,
   errors,
   onDownloadSingle,
+  exportingSingleId,
 }) {
   const [maximizedPieceId, setMaximizedPieceId] = useState(null);
 
@@ -29,6 +30,7 @@ export function MultiViewport({
           piece={piece}
           stlData={renderedStls[piece.id]}
           isLoading={loadingStates[piece.id]}
+          isExportingHD={exportingSingleId === piece.id}
           error={errors[piece.id]}
           isMaximized={maximizedPieceId === piece.id}
           onToggleMaximize={toggleMaximize}

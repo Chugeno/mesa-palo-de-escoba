@@ -591,3 +591,208 @@ input:checked + .slider-switch:before {
     grid-template-columns: 1fr;
   }
 }
+
+/* ==========================================================================
+   MODAL DE PROGRESO DE EXPORTACIÓN REAL
+   ========================================================================== */
+.export-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.65);
+  backdrop-filter: blur(8px);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  animation: fadeIn 0.2s ease-out;
+}
+
+.export-modal-card {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+  width: 100%;
+  max-width: 480px;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.export-modal-header {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.export-modal-icon {
+  width: 42px;
+  height: 42px;
+  border-radius: var(--radius-md);
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.2), rgba(99, 102, 241, 0.2));
+  color: var(--color-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.export-modal-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text-main);
+  margin: 0 0 2px 0;
+}
+
+.export-modal-subtitle {
+  font-size: 12px;
+  color: var(--text-muted);
+  margin: 0;
+}
+
+.export-progress-section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.export-progress-labels {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 13px;
+}
+
+.export-status-text {
+  font-weight: 500;
+  color: var(--text-main);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 340px;
+}
+
+.export-percent-badge {
+  font-weight: 700;
+  color: var(--color-primary);
+  background: rgba(59, 130, 246, 0.1);
+  padding: 2px 8px;
+  border-radius: var(--radius-full);
+  font-size: 12px;
+}
+
+.export-progress-track {
+  width: 100%;
+  height: 8px;
+  background: var(--bg-hover);
+  border-radius: var(--radius-full);
+  overflow: hidden;
+  position: relative;
+}
+
+.export-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #3b82f6, #6366f1);
+  border-radius: var(--radius-full);
+  transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.export-pieces-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  background: var(--bg-base);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: 8px;
+}
+
+.export-piece-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 12px;
+  border-radius: var(--radius-sm);
+  transition: all 0.2s ease;
+}
+
+.export-piece-item.active {
+  background: rgba(59, 130, 246, 0.1);
+  border: 1px solid rgba(59, 130, 246, 0.25);
+}
+
+.export-piece-item.completed {
+  opacity: 0.8;
+}
+
+.export-piece-item.pending {
+  opacity: 0.45;
+}
+
+.export-piece-status-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.export-piece-info {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.export-piece-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-main);
+}
+
+.export-piece-file {
+  font-size: 11px;
+  color: var(--text-muted);
+  font-family: monospace;
+}
+
+.export-piece-badge {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--text-muted);
+}
+
+.export-piece-item.active .export-piece-badge {
+  color: var(--color-primary);
+  font-weight: 600;
+}
+
+.export-piece-item.completed .export-piece-badge {
+  color: var(--color-success);
+}
+
+.export-modal-footer {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11px;
+  color: var(--text-muted);
+  border-top: 1px solid var(--border-color);
+  padding-top: 12px;
+}
+
+.spin-icon {
+  animation: spin 1s linear infinite;
+}
+
+.text-success {
+  color: var(--color-success, #10b981);
+}
+
+.text-primary {
+  color: var(--color-primary, #3b82f6);
+}
+
+.text-muted {
+  color: var(--text-muted);
+}

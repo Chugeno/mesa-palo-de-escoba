@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Header } from './components/ui/Header';
 import { ParameterSidebar } from './components/controls/ParameterSidebar';
 import { MultiViewport } from './components/viewer/MultiViewport';
+import { ExportProgressModal } from './components/ui/ExportProgressModal';
 import {
   PIECES,
   getDefaultParamValues,
@@ -18,9 +19,9 @@ import guiaRaw from '../Guia_Esquina.scad?raw';
 
 const SCAD_SOURCES = {
   patas: patasRaw,
-  abrazadera: abrazaderaRaw,
-  cruceta: crucetaRaw,
-  guia: guiaRaw,
+  abrazadera_pata: abrazaderaRaw,
+  cruceta_centro: crucetaRaw,
+  guia_esquina: guiaRaw,
 };
 
 export function App() {
@@ -29,26 +30,28 @@ export function App() {
 
   const [renderedStls, setRenderedStls] = useState({
     patas: null,
-    abrazadera: null,
-    cruceta: null,
-    guia: null,
+    abrazadera_pata: null,
+    cruceta_centro: null,
+    guia_esquina: null,
   });
 
   const [loadingStates, setLoadingStates] = useState({
     patas: false,
-    abrazadera: false,
-    cruceta: false,
-    guia: false,
+    abrazadera_pata: false,
+    cruceta_centro: false,
+    guia_esquina: false,
   });
 
   const [errors, setErrors] = useState({
     patas: null,
-    abrazadera: null,
-    cruceta: null,
-    guia: null,
+    abrazadera_pata: null,
+    cruceta_centro: null,
+    guia_esquina: null,
   });
 
   const [isExportingZip, setIsExportingZip] = useState(false);
+  const [zipProgress, setZipProgress] = useState(null);
+  const [exportingSingleId, setExportingSingleId] = useState(null);
   const debounceTimerRef = useRef(null);
 
   // Compilar una pieza específica usando flags -D
@@ -118,42 +121,51 @@ export function App() {
 
   // Descarga individual en alta definición ($fn = 80)
   const handleDownloadSingle = async (pieceId) => {
+    setExportingSingleId(pieceId);
     const rawCode = SCAD_SOURCES[pieceId];
-    if (rawCode) {
-      try {
+    try {
+      if (rawCode) {
         await exportSingleToStl({
           pieceId,
           scadCode: rawCode,
           paramValues,
           highQualityFn: 80,
         });
-        return;
-      } catch (err) {
-        console.error('Error al exportar STL en alta calidad, usando buffer:', err);
+      } else {
+        const stlData = renderedStls[pieceId];
+        const piece = PIECES[pieceId];
+        if (stlData && piece) {
+          downloadStlFile(stlData, piece.exportName);
+        }
       }
-    }
-
-    // Fallback si no estuviera disponible el source
-    const stlData = renderedStls[pieceId];
-    const piece = PIECES[pieceId];
-    if (stlData && piece) {
-      downloadStlFile(stlData, piece.exportName);
+    } catch (err) {
+      console.error('Error al exportar STL individual:', err);
+      alert('Error al generar STL: ' + err.message);
+    } finally {
+      setExportingSingleId(null);
     }
   };
 
-  // Exportar todo en ZIP
+  // Exportar todo en ZIP con barra de progreso real
   const handleExportAll = async () => {
     setIsExportingZip(true);
+    setZipProgress({ current: 1, total: 4, pieceName: 'Iniciando compilación...', isZipping: false });
     try {
       await exportAllToZip({
         scadSources: SCAD_SOURCES,
         paramValues,
         highQualityFn: 80,
+        onProgress: (progress) => {
+          setZipProgress(progress);
+        },
       });
     } catch (err) {
       alert('Error al exportar archivos STL: ' + err.message);
     } finally {
-      setIsExportingZip(false);
+      setTimeout(() => {
+        setIsExportingZip(false);
+        setZipProgress(null);
+      }, 700);
     }
   };
 
@@ -179,9 +191,13 @@ export function App() {
             loadingStates={loadingStates}
             errors={errors}
             onDownloadSingle={handleDownloadSingle}
+            exportingSingleId={exportingSingleId}
           />
         </main>
       </div>
+
+      {/* Modal de progreso de exportación ZIP */}
+      <ExportProgressModal progress={zipProgress} />
     </div>
   );
 }

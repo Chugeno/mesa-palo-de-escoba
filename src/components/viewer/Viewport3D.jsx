@@ -9,6 +9,7 @@ export function Viewport3D({
   piece,
   stlData,
   isLoading,
+  isExportingHD,
   error,
   isMaximized,
   onToggleMaximize,
@@ -274,11 +275,20 @@ export function Viewport3D({
           variant="secondary"
           size="sm"
           onClick={() => onDownloadSingle(piece.id)}
-          disabled={!stlData || isLoading}
-          title="Descargar solo este archivo STL"
+          disabled={!stlData || isLoading || isExportingHD}
+          title="Descargar solo este archivo STL en alta definición ($fn=80)"
         >
-          <Download size={13} />
-          <span>STL</span>
+          {isExportingHD ? (
+            <>
+              <div className="spinner" style={{ width: 12, height: 12, borderWidth: 2 }} />
+              <span>Generando HD...</span>
+            </>
+          ) : (
+            <>
+              <Download size={13} />
+              <span>STL</span>
+            </>
+          )}
         </Button>
       </div>
     </div>
