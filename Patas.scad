@@ -103,7 +103,7 @@ module leg_socket() {
 
             // 2. Tubo receptor inclinado y cuello de transición
             hull() {
-                cylinder(h = base_thickness + 2, r = r_outer + 2);
+                cylinder(h = base_thickness, r = r_outer + 2);
                 
                 translate([0, 0, base_thickness])
                 rotate([0, leg_angle, 0])
