@@ -78,13 +78,11 @@ export function App() {
     []
   );
 
-  // Compilar secuencialmente todas las piezas
+  // Compilar todas las piezas en paralelo aprovechando el Worker Pool multi-hilo
   const compileAllPieces = useCallback(
     async (values, fnVal) => {
       const pieceIds = Object.keys(PIECES);
-      for (const pieceId of pieceIds) {
-        await compilePiece(pieceId, values, fnVal);
-      }
+      await Promise.all(pieceIds.map((pieceId) => compilePiece(pieceId, values, fnVal)));
     },
     [compilePiece]
   );
@@ -97,7 +95,7 @@ export function App() {
 
     debounceTimerRef.current = setTimeout(() => {
       compileAllPieces(paramValues, previewFn);
-    }, 200);
+    }, 300);
 
     return () => {
       if (debounceTimerRef.current) {

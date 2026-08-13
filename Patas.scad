@@ -101,31 +101,28 @@ module leg_socket() {
             linear_extrude(height = base_thickness)
             base_plate_2d(base_size, corner_radius, key_chamfer, chamfer_radius);
 
-            // 2. Tubo receptor inclinado y cuello de transición
-            hull() {
-                cylinder(h = base_thickness, r = r_outer + 2);
-                
-                translate([0, 0, base_thickness])
-                rotate([0, leg_angle, 0])
-                cylinder(h = socket_height, r = r_outer);
-            }
+            // 2. Tubo receptor inclinado
+            translate([0, 0, base_thickness])
+            rotate([0, leg_angle, 0])
+            cylinder(h = socket_height, r = r_outer);
 
-            // 3. Nervios de refuerzo (Ménsulas / Gussets hacia las esquinas)
+            // 3. Collar de refuerzo cónico en la base
+            translate([0, 0, base_thickness])
+            rotate([0, leg_angle, 0])
+            cylinder(h = 6, r1 = r_outer + 2.5, r2 = r_outer);
+
+            // 4. 4 Ménsulas de refuerzo sólidas y limpias hacia las esquinas
             for (i = [0 : num_screws - 1]) {
-                a = (i + 0.5) * (360 / num_screws); // Alternados a 45°, 135°, 225°, 315°
-                hull() {
-                    // Anclaje en el tubo inclinado (inmerso)
-                    translate([0, 0, base_thickness])
-                    rotate([0, leg_angle, 0])
-                    rotate([0, 0, a])
-                    translate([r_pole + 0.5, -wall_thickness/2, 0])
-                        cube([wall_thickness + 1, wall_thickness, socket_height * 0.55]);
-
-                    // Anclaje en la placa base (inmerso)
-                    rotate([0, 0, a])
-                    translate([half_base - 8, -wall_thickness/2, -0.5])
-                        cube([3, wall_thickness, base_thickness + 1]);
-                }
+                a = (i + 0.5) * (360 / num_screws);
+                rotate([0, 0, a])
+                translate([0, -wall_thickness/2, base_thickness])
+                rotate([90, 0, 90])
+                linear_extrude(height = half_base - 8)
+                polygon([
+                    [0, 0],
+                    [0, socket_height * 0.5],
+                    [(half_base - 8) - r_outer, 0]
+                ]);
             }
         }
 

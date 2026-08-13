@@ -46,28 +46,40 @@ export async function exportAllToZip({
   const zip = new JSZip();
   const pieces = Object.values(PIECES);
   const dFlags = generateDFlags(paramValues, highQualityFn);
+  let completedCount = 0;
 
-  for (let i = 0; i < pieces.length; i++) {
-    const piece = pieces[i];
-    if (onProgress) {
-      onProgress({
-        current: i + 1,
-        total: pieces.length,
-        pieceName: piece.name,
-      });
-    }
-
-    const rawCode = scadSources[piece.id];
-    if (!rawCode) continue;
-
-    try {
-      const { stlData } = await compileScadToStl(piece.id, rawCode, dFlags);
-      zip.file(piece.exportName, stlData);
-    } catch (err) {
-      console.error(`Error al exportar ${piece.name}:`, err);
-      throw new Error(`Error al compilar ${piece.name}: ${err.message}`);
-    }
+  if (onProgress) {
+    onProgress({
+      current: 1,
+      total: pieces.length,
+      pieceName: 'Compilando en paralelo...',
+      isZipping: false,
+    });
   }
+
+  await Promise.all(
+    pieces.map(async (piece) => {
+      const rawCode = scadSources[piece.id];
+      if (!rawCode) return;
+
+      try {
+        const { stlData } = await compileScadToStl(piece.id, rawCode, dFlags);
+        zip.file(piece.exportName, stlData);
+        completedCount++;
+        if (onProgress) {
+          onProgress({
+            current: Math.min(completedCount + 1, pieces.length),
+            total: pieces.length,
+            pieceName: piece.name,
+            isZipping: completedCount === pieces.length,
+          });
+        }
+      } catch (err) {
+        console.error(`Error al exportar ${piece.name}:`, err);
+        throw new Error(`Error al compilar ${piece.name}: ${err.message}`);
+      }
+    })
+  );
 
   // Notificar que se está generando el ZIP
   if (onProgress) {
