@@ -47,6 +47,9 @@ r_pole = actual_pole_d / 2;
 r_outer = r_pole + wall_thickness;
 z_offset = actual_pole_d + wall_thickness + vertical_clearance;
 
+// Largo del puente central de transición (tangente a los tubos)
+bridge_length = min(socket_length * 0.8, r_outer * 2.2);
+
 // Altura total de la pieza
 total_height = z_offset + r_outer * 2;
 
@@ -89,16 +92,18 @@ module central_cross() {
             rotate([0, 0, -theta])
             sleeve_axis(clearance_bore = false);
 
-            // 3. Bloque / Puente central de unión para rigidizar el cruce
+            // 3. Puente central de unión perfectamente enrasado y tangente a ambos tubos
             hull() {
-                // Anillo central del tubo inferior
+                // Segmento central del tubo inferior
                 rotate([0, 0, theta])
-                cylinder(h = 1, r = r_outer + 1, center = true);
+                rotate([0, 90, 0])
+                cylinder(h = bridge_length, r = r_outer, center = true);
 
-                // Anillo central del tubo superior elevándose
+                // Segmento central del tubo superior
                 translate([0, 0, z_offset])
                 rotate([0, 0, -theta])
-                cylinder(h = 1, r = r_outer + 1, center = true);
+                rotate([0, 90, 0])
+                cylinder(h = bridge_length, r = r_outer, center = true);
             }
         }
 
@@ -114,7 +119,7 @@ module central_cross() {
         sleeve_axis(clearance_bore = true);
 
         // C. Tornillos opresores para bloquear los 4 extremos de los palos
-        screw_dist = socket_length * 0.6;
+        screw_dist = socket_length * 0.65;
 
         // Tornillos del tubo inferior (Z = 0)
         rotate([0, 0, theta]) {

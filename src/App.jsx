@@ -8,7 +8,7 @@ import {
   generateDFlags,
 } from './config/parameters';
 import { compileScadToStl } from './engine/scadCompiler';
-import { downloadStlFile, exportAllToZip } from './utils/exporter';
+import { downloadStlFile, exportSingleToStl, exportAllToZip } from './utils/exporter';
 
 // Importar directamente los archivos .scad originales (con soporte HMR en Vite)
 import patasRaw from '../Patas.scad?raw';
@@ -116,8 +116,24 @@ export function App() {
     setParamValues(getDefaultParamValues());
   };
 
-  // Descarga individual
-  const handleDownloadSingle = (pieceId) => {
+  // Descarga individual en alta definición ($fn = 80)
+  const handleDownloadSingle = async (pieceId) => {
+    const rawCode = SCAD_SOURCES[pieceId];
+    if (rawCode) {
+      try {
+        await exportSingleToStl({
+          pieceId,
+          scadCode: rawCode,
+          paramValues,
+          highQualityFn: 80,
+        });
+        return;
+      } catch (err) {
+        console.error('Error al exportar STL en alta calidad, usando buffer:', err);
+      }
+    }
+
+    // Fallback si no estuviera disponible el source
     const stlData = renderedStls[pieceId];
     const piece = PIECES[pieceId];
     if (stlData && piece) {

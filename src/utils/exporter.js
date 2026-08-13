@@ -18,6 +18,23 @@ export function downloadStlFile(stlString, fileName) {
 }
 
 /**
+ * Compila y descarga una pieza individual en alta definición ($fn = 80)
+ */
+export async function exportSingleToStl({
+  pieceId,
+  scadCode,
+  paramValues,
+  highQualityFn = 80,
+}) {
+  const piece = PIECES[pieceId];
+  if (!piece || !scadCode) return;
+
+  const dFlags = generateDFlags(paramValues, highQualityFn);
+  const { stlData } = await compileScadToStl(pieceId, scadCode, dFlags);
+  downloadStlFile(stlData, piece.exportName);
+}
+
+/**
  * Compila y empaqueta las 4 piezas en un archivo ZIP de alta calidad ($fn = 80)
  */
 export async function exportAllToZip({
