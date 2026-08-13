@@ -19,9 +19,9 @@ import guiaRaw from '../Guia_Esquina.scad?raw';
 
 const SCAD_SOURCES = {
   patas: patasRaw,
-  abrazadera_pata: abrazaderaRaw,
-  cruceta_centro: crucetaRaw,
-  guia_esquina: guiaRaw,
+  abrazadera: abrazaderaRaw,
+  cruceta: crucetaRaw,
+  guia: guiaRaw,
 };
 
 export function App() {
@@ -30,23 +30,23 @@ export function App() {
 
   const [renderedStls, setRenderedStls] = useState({
     patas: null,
-    abrazadera_pata: null,
-    cruceta_centro: null,
-    guia_esquina: null,
+    abrazadera: null,
+    cruceta: null,
+    guia: null,
   });
 
   const [loadingStates, setLoadingStates] = useState({
     patas: false,
-    abrazadera_pata: false,
-    cruceta_centro: false,
-    guia_esquina: false,
+    abrazadera: false,
+    cruceta: false,
+    guia: false,
   });
 
   const [errors, setErrors] = useState({
     patas: null,
-    abrazadera_pata: null,
-    cruceta_centro: null,
-    guia_esquina: null,
+    abrazadera: null,
+    cruceta: null,
+    guia: null,
   });
 
   const [isExportingZip, setIsExportingZip] = useState(false);
