@@ -15,7 +15,7 @@ import { downloadStlFile, exportSingleToStl, exportAllToZip } from './utils/expo
 import patasRaw from '../Patas.scad?raw';
 import abrazaderaRaw from '../Abrazadera_Pata.scad?raw';
 import crucetaRaw from '../Cruceta_Centro.scad?raw';
-import guiaRaw from '../Guia_Esquina.scad?raw';
+import guiaRaw from '../Guia_Esquina_Lite.scad?raw';
 
 const SCAD_SOURCES = {
   patas: patasRaw,

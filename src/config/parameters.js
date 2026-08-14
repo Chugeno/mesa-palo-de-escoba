@@ -26,10 +26,10 @@ export const PIECES = {
   },
   guia: {
     id: 'guia',
-    name: '4. Guía / Plantilla Esquina',
-    fileName: 'Guia_Esquina.scad',
-    exportName: 'Guia_Esquina.stl',
-    description: 'Plantilla de montaje para taladrar la brida a la distancia exacta de los bordes.',
+    name: '4. Guía / Plantilla Esquina Lite',
+    fileName: 'Guia_Esquina_Lite.scad',
+    exportName: 'Guia_Esquina_Lite.stl',
+    description: 'Plantilla de montaje esquelética con rieles paralelos para taladrar la brida a la distancia exacta de los bordes.',
   },
 };
 
