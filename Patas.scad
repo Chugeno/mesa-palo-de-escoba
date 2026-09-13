@@ -199,10 +199,6 @@ module leg_socket() {
                 }
             }
         }
-
-        // E. Plano de corte inferior perfectamente rasante a la mesa (Z < 0)
-        translate([-(base_size * 2), -(base_size * 2), -50])
-        cube([base_size * 4, base_size * 4, 50]);
     }
 }
 

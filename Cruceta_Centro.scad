@@ -65,17 +65,18 @@ module sleeve_axis(clearance_bore = false) {
 
 module screw_hole() {
     rotate([90, 0, 0]) {
-        // Agujero pasante para el tornillo
-        cylinder(h = r_outer * 2 + 2, d = screw_diameter, center = true);
+        // Agujero pasante para el tornillo (con margen limpio en ambos extremos)
+        cylinder(h = r_outer * 2 + 10, d = screw_diameter, center = true);
         
         if (countersink) {
-            // Avellanado en ambas caras externas
-            translate([0, 0, r_outer - 1.5])
-            cylinder(h = 3, d1 = screw_diameter, d2 = screw_diameter * 2.2, center = true);
+            // Avellanado cónico exterior superior (con sobrepaso limpio hacia afuera)
+            translate([0, 0, r_outer - 2])
+            cylinder(h = 5, d1 = screw_diameter, d2 = screw_diameter + 6);
             
-            translate([0, 0, -(r_outer - 1.5)])
+            // Avellanado cónico exterior inferior (con sobrepaso limpio hacia afuera)
+            translate([0, 0, -(r_outer - 2)])
             rotate([180, 0, 0])
-            cylinder(h = 3, d1 = screw_diameter, d2 = screw_diameter * 2.2, center = true);
+            cylinder(h = 5, d1 = screw_diameter, d2 = screw_diameter + 6);
         }
     }
 }

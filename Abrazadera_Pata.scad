@@ -62,14 +62,14 @@ socket_angle = leg_angle;
 head_depth_leg = min(wall_thickness * 0.65, 3.0);
 head_depth_brace = min(wall_thickness * 0.65, 3.0);
 
-module wood_screw_hole(d_screw, depth_c) {
-    // Agujero pasante
-    cylinder(h = r_outer_clamp * 2 + 10, d = d_screw, center = true);
+module wood_screw_hole(d_screw, depth_c, r_cyl = r_outer_clamp) {
+    // Agujero pasante con margen limpio en ambos extremos
+    cylinder(h = r_cyl * 2 + 10, d = d_screw, center = true);
     
-    // Avellanado cónico en la superficie de entrada del tornillo
+    // Avellanado cónico adaptativo con sobrepaso exterior limpio
     if (countersink) {
-        translate([0, 0, r_outer_clamp - depth_c])
-        cylinder(h = depth_c + 2, d1 = d_screw, d2 = d_screw + (depth_c * 2));
+        translate([0, 0, r_cyl - depth_c])
+        cylinder(h = depth_c + 4, d1 = d_screw, d2 = d_screw + ((depth_c + 4) * 2));
     }
 }
 
@@ -85,15 +85,11 @@ module leg_clamp() {
             rotate([0, 90, 0])
             cylinder(h = socket_length, r = r_outer_socket, center = true);
             
-            // Refuerzo de acople entre manguito y socket
-            hull() {
-                cylinder(h = clamp_height * 0.8, r = r_outer_clamp, center = true);
-                
-                rotate([0, -socket_angle, 0])
-                translate([-r_pole - 5, 0, 0])
-                rotate([0, 90, 0])
-                cylinder(h = 5, r = r_outer_socket, center = true);
-            }
+            // Refuerzo de cuello de transición cónico entre manguito y socket
+            rotate([0, -socket_angle, 0])
+            translate([-r_pole - 6, 0, 0])
+            rotate([0, 90, 0])
+            cylinder(h = 10, r1 = r_outer_socket + 3, r2 = r_outer_socket, center = true);
         }
 
         // --- SUBTRACCIONES / PERFORACIONES ---
@@ -121,7 +117,7 @@ module leg_clamp() {
         rotate([0, -socket_angle, 0])
         translate([-r_pole - socket_length * 0.5, 0, 0])
         rotate([90, 0, 0])
-        wood_screw_hole(locking_screw_diameter, head_depth_brace);
+        wood_screw_hole(locking_screw_diameter, head_depth_brace, r_outer_socket);
     }
 }
 
