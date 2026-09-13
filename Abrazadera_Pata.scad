@@ -74,16 +74,19 @@ module wood_screw_hole(d_screw, depth_c, r_cyl = r_outer_clamp) {
 }
 
 module leg_clamp() {
+    // Largo total del cilindro exterior del socket para penetrar completamente en el manguito (cero luz)
+    total_socket_len = socket_length + r_outer_clamp + 5;
+
     difference() {
         union() {
             // 1. Cuerpo del manguito (Cilindro sólido deslizante)
             cylinder(h = clamp_height, r = r_outer_clamp, center = true);
 
-            // 2. Socket para el palo de la X (Angulado en X negativo para quedar horizontal)
+            // 2. Socket para el palo de la X con penetración continua en el manguito (cero luz)
             rotate([0, -socket_angle, 0])
-            translate([-(socket_length / 2 + r_pole), 0, 0])
+            translate([-total_socket_len, 0, 0])
             rotate([0, 90, 0])
-            cylinder(h = socket_length, r = r_outer_socket, center = true);
+            cylinder(h = total_socket_len, r = r_outer_socket);
         }
 
         // --- SUBTRACCIONES / PERFORACIONES ---
@@ -94,22 +97,22 @@ module leg_clamp() {
         // B. Tornillo de fijación inferior 1 (Entra desde el lado opuesto en +X, a 0° de rotación)
         translate([0, 0, -clamp_height * 0.25])
         rotate([0, 90, 0])
-        wood_screw_hole(leg_screw_diameter, head_depth_leg);
+        wood_screw_hole(leg_screw_diameter, head_depth_leg, r_outer_clamp);
 
         // C. Tornillo de fijación superior 2 (Cruzado a 90° en Y positivo)
         translate([0, 0, clamp_height * 0.25])
         rotate([-90, 0, 0])
-        wood_screw_hole(leg_screw_diameter, head_depth_leg);
+        wood_screw_hole(leg_screw_diameter, head_depth_leg, r_outer_clamp);
 
         // D. Hueco interior del socket de la X (con holgura)
         rotate([0, -socket_angle, 0])
-        translate([-(socket_length / 2 + r_pole), 0, 0])
+        translate([-total_socket_len - 1, 0, 0])
         rotate([0, 90, 0])
-        cylinder(h = socket_length + 10, r = r_brace, center = true);
+        cylinder(h = total_socket_len + 1, r = r_brace);
 
         // E. Tornillo opresor para trabar el palo de la X
         rotate([0, -socket_angle, 0])
-        translate([-r_pole - socket_length * 0.5, 0, 0])
+        translate([-(r_outer_clamp + socket_length * 0.5), 0, 0])
         rotate([90, 0, 0])
         wood_screw_hole(locking_screw_diameter, head_depth_brace, r_outer_socket);
     }
