@@ -142,11 +142,11 @@ module leg_socket() {
         translate([0, 0, -0.5])
         cylinder(h = socket_height + 15, r = r_pole);
 
-        // B. Chaflán de entrada superior para facilitar meter el palo
+        // B. Chaflán de entrada superior para facilitar meter el palo (corte limpio sin aristas tangentes)
         translate([0, 0, base_thickness])
         rotate([0, leg_angle, 0])
         translate([0, 0, socket_height - 3])
-        cylinder(h = 4, r1 = r_pole, r2 = r_pole + 1.5);
+        cylinder(h = 5, r1 = r_pole - 1, r2 = r_pole + 2);
 
         // C. 4 Orificios para tornillos de mesa centrados en los 4 lados planos
         screw_pos = max(r_outer + screw_diameter + 1, half_base - (screw_diameter * 1.8));

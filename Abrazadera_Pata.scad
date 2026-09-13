@@ -84,12 +84,6 @@ module leg_clamp() {
             translate([-(socket_length / 2 + r_pole), 0, 0])
             rotate([0, 90, 0])
             cylinder(h = socket_length, r = r_outer_socket, center = true);
-            
-            // Refuerzo de cuello de transición cónico entre manguito y socket
-            rotate([0, -socket_angle, 0])
-            translate([-r_pole - 6, 0, 0])
-            rotate([0, 90, 0])
-            cylinder(h = 10, r1 = r_outer_socket + 3, r2 = r_outer_socket, center = true);
         }
 
         // --- SUBTRACCIONES / PERFORACIONES ---
