@@ -27,8 +27,8 @@ pole_diameter = 22.0; // [15:0.5:50]
 // @studio {"label":"Holgura del palo","description":"Holgura diametral configurada en Patas.scad","unit":"mm","group":"Soporte"}
 pole_clearance = 0.4; // [0.1:0.05:1.0]
 
-// @studio {"label":"Margen base respecto al palo","description":"Mismo valor configurado en Patas.scad","unit":"mm","group":"Soporte"}
-base_margin = 52.5; // [30:0.5:80]
+// @studio {"label":"Tamaño de la base","description":"Mismo valor configurado en Patas.scad (76x76 mm)","unit":"mm","group":"Soporte"}
+base_size = 76; // [60:1:120]
 
 // @studio {"label":"Radio de esquinas estándar","description":"Mismo valor configurado en Patas.scad","unit":"mm","group":"Soporte"}
 corner_radius = 8; // [3:1:20]
@@ -62,7 +62,6 @@ bracket_angle = 225; // [0:15:360]
 $fn = 80;
 
 // --- CÁLCULOS GEOMÉTRICOS SIMPLIFICADOS ---
-base_size = pole_diameter + base_margin;
 half_base = base_size / 2;
 
 // Distancia radial desde el centro de la base hasta la esquina más lejana

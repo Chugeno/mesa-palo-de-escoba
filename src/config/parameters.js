@@ -132,14 +132,14 @@ export const PARAM_DEFINITIONS = [
     group: 'global',
   },
   {
-    id: 'base_margin',
-    label: 'Margen de Base',
-    description: 'Margen para calcular el ancho de la placa cuadrada (Patas y Guía)',
+    id: 'base_size',
+    label: 'Tamaño Base (Fijo)',
+    description: 'Ancho y largo fijo de la placa base donde se atornilla la pata a la mesa (Patas y Guía)',
     unit: 'mm',
-    min: 30,
-    max: 80,
-    step: 0.5,
-    defaultValue: 52.5,
+    min: 60,
+    max: 100,
+    step: 1,
+    defaultValue: 76,
     isGlobal: true,
     affects: ['patas', 'guia'],
     group: 'global',
@@ -348,9 +348,8 @@ export function generateDFlags(paramValues, fnValue = 36) {
     flags.push('-D', `screw_diameter=${paramValues.screw_diameter}`);
     flags.push('-D', `leg_screw_diameter=${paramValues.screw_diameter}`);
   }
-  if (paramValues.base_margin !== undefined) {
-    flags.push('-D', `base_margin=${paramValues.base_margin}`);
-  }
+  const baseSize = paramValues.base_size !== undefined ? paramValues.base_size : 76;
+  flags.push('-D', `base_size=${baseSize}`);
   if (paramValues.socket_height !== undefined) {
     flags.push('-D', `socket_height=${paramValues.socket_height}`);
   }

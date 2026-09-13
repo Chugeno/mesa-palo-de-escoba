@@ -17,8 +17,8 @@ socket_height = 45; // [25:1:80]
 leg_angle = 10; // [0:1:20]
 
 /* [Base de Fijación a la Mesa] */
-// @studio {"label":"Margen base respecto al palo","description":"Diferencia fija para calcular el ancho de la placa cuadrada","unit":"mm","group":"Base"}
-base_margin = 52.5; // [30:0.5:80]
+// @studio {"label":"Tamaño de la base","description":"Dimensión fija de la placa cuadrada en mm (76x76 mm)","unit":"mm","group":"Base"}
+base_size = 76; // [60:1:120]
 
 // @studio {"label":"Grosor de la base","description":"Espesor de la placa base","unit":"mm","group":"Base"}
 base_thickness = 5; // [3:1:10]
@@ -70,7 +70,6 @@ num_screws = 4; // 4 tornillos de montaje en cruz
 actual_pole_d = pole_diameter + pole_clearance;
 r_pole = actual_pole_d / 2;
 r_outer = r_pole + wall_thickness;
-base_size = pole_diameter + base_margin;
 half_base = base_size / 2;
 
 // Profundidades seguras de avellanado
