@@ -27,6 +27,7 @@ const SCAD_SOURCES = {
 export function App() {
   const [paramValues, setParamValues] = useState(getDefaultParamValues);
   const [previewFn, setPreviewFn] = useState(36);
+  const [activeSection, setActiveSection] = useState('basic');
 
   const [renderedStls, setRenderedStls] = useState({
     patas: null,
@@ -181,6 +182,8 @@ export function App() {
           onParamChange={handleParamChange}
           previewFn={previewFn}
           onPreviewFnChange={setPreviewFn}
+          activeSection={activeSection}
+          onSectionChange={setActiveSection}
         />
 
         <main className="app-viewport-area">
@@ -190,6 +193,8 @@ export function App() {
             errors={errors}
             onDownloadSingle={handleDownloadSingle}
             exportingSingleId={exportingSingleId}
+            activeSection={activeSection}
+            onSectionChange={setActiveSection}
           />
         </main>
       </div>

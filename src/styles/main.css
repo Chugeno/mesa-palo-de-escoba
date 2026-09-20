@@ -138,17 +138,80 @@ html, body {
 }
 
 /* ==========================================================================
-   CUADRÍCULA DE VIEWPORTS 3D
+   CUADRÍCULA Y FILTRO DE VIEWPORTS 3D
    ========================================================================== */
+.viewport-wrapper {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+.viewport-filter-bar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 12px;
+  background: var(--bg-sidebar);
+  border-bottom: 1px solid var(--border-color);
+  z-index: 15;
+}
+
+.viewport-filter-pill-group {
+  display: inline-flex;
+  background: var(--bg-app);
+  padding: 3px;
+  border-radius: var(--radius-full);
+  border: 1px solid var(--border-color);
+  gap: 4px;
+}
+
+.viewport-filter-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 12px;
+  font-size: 12px;
+  font-weight: 500;
+  border-radius: var(--radius-full);
+  border: none;
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.viewport-filter-pill:hover {
+  color: var(--text-main);
+  background: var(--bg-hover);
+}
+
+.viewport-filter-pill.active {
+  background: var(--color-primary);
+  color: #ffffff;
+  font-weight: 600;
+  box-shadow: 0 1px 4px rgba(59, 130, 246, 0.35);
+}
+
 .viewport-grid {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  grid-template-rows: repeat(2, 1fr);
+  flex: 1;
   gap: 12px;
   padding: 12px;
   width: 100%;
   height: 100%;
   overflow: hidden;
+}
+
+.viewport-grid.four-view {
+  grid-template-columns: repeat(2, 1fr);
+  grid-template-rows: repeat(2, 1fr);
+}
+
+.viewport-grid.two-view {
+  grid-template-columns: repeat(2, 1fr);
+  grid-template-rows: 1fr;
 }
 
 .viewport-grid.single-view {
@@ -445,6 +508,16 @@ html, body {
   gap: 6px;
 }
 
+.param-section-desc {
+  font-size: 12px;
+  color: var(--text-muted);
+  line-height: 1.45;
+  background: var(--bg-app);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: 8px 12px;
+}
+
 .param-item {
   display: flex;
   flex-direction: column;
@@ -587,8 +660,12 @@ input:checked + .slider-switch:before {
 }
 
 @media (max-width: 640px) {
-  .viewport-grid {
+  .viewport-grid,
+  .viewport-grid.four-view,
+  .viewport-grid.two-view {
     grid-template-columns: 1fr;
+    grid-template-rows: auto;
+    overflow-y: auto;
   }
 }
 
