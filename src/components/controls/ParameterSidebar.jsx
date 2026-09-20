@@ -1,5 +1,5 @@
 import React from 'react';
-import { Sparkles, Shield, Sliders, Zap } from 'lucide-react';
+import { Sparkles, Shield, Sliders, Zap, Wrench } from 'lucide-react';
 import { PARAM_DEFINITIONS } from '../../config/parameters';
 import { ParamSlider } from '../ui/ParamSlider';
 import { ParamToggle } from '../ui/ParamToggle';
@@ -12,11 +12,10 @@ export function ParameterSidebar({
   activeSection = 'basic',
   onSectionChange,
 }) {
-  const basicParams = PARAM_DEFINITIONS.filter((p) => p.section === 'basic');
-  const reinforcementParams = PARAM_DEFINITIONS.filter((p) => p.section === 'reinforcement');
-  const advancedParams = PARAM_DEFINITIONS.filter((p) => p.section === 'advanced');
+  const paramById = Object.fromEntries(PARAM_DEFINITIONS.map((p) => [p.id, p]));
 
   const renderParam = (param) => {
+    if (!param) return null;
     if (param.type === 'boolean') {
       return (
         <ParamToggle
@@ -42,6 +41,36 @@ export function ParameterSidebar({
       />
     );
   };
+
+  // Listas de parámetros para la sección Avanzado (todas las opciones ordenadas por pieza)
+  const pataParamIds = [
+    'pole_diameter',
+    'pole_clearance',
+    'socket_height',
+    'base_size',
+    'leg_angle',
+    'wall_thickness',
+    'screw_diameter',
+    'side_screw',
+    'second_side_screw',
+  ];
+
+  const refuerzoParamIds = [
+    'table_length',
+    'table_width',
+    'brace_diameter',
+    'clamp_height',
+    'socket_length',
+    'brace_clearance',
+    'vertical_clearance',
+  ];
+
+  const guiaParamIds = [
+    'edge_offset_x',
+    'edge_offset_y',
+    'table_lip_height',
+    'fit_clearance',
+  ];
 
   return (
     <aside className="app-sidebar">
@@ -91,7 +120,7 @@ export function ParameterSidebar({
               Ajusta el diámetro nominal de tus palos de escoba. El soporte de pata y la plantilla de perforación se dimensionarán automáticamente.
             </p>
 
-            {basicParams.map(renderParam)}
+            {renderParam(paramById.pole_diameter)}
           </div>
         )}
 
@@ -108,50 +137,46 @@ export function ParameterSidebar({
               Medidas requeridas para que la cruceta central y las abrazaderas calculen la diagonal exacta en X.
             </p>
 
-            {reinforcementParams
-              .filter((p) => p.id === 'table_length' || p.id === 'table_width')
-              .map(renderParam)}
+            {renderParam(paramById.table_length)}
+            {renderParam(paramById.table_width)}
 
             <div className="param-group-title" style={{ marginTop: 20 }}>
               <Shield size={14} />
               <span>Abrazadera y Refuerzo</span>
             </div>
 
-            {reinforcementParams
-              .filter((p) => p.id === 'brace_diameter' || p.id === 'clamp_height')
-              .map(renderParam)}
+            {renderParam(paramById.brace_diameter)}
+            {renderParam(paramById.clamp_height)}
           </div>
         )}
 
         {/* ==========================================
-            3. SECCIÓN AVANZADO
+            3. SECCIÓN AVANZADO (TODAS LAS OPCIONES ORDENADAS POR PIEZA)
             ========================================== */}
         {activeSection === 'advanced' && (
           <div className="param-group">
+            {/* Pieza 1: Soporte de Pata */}
             <div className="param-group-title">
-              <Sliders size={14} />
-              <span>Estructura y Pata</span>
+              <Wrench size={14} />
+              <span>1. Soporte de Pata</span>
             </div>
-            {advancedParams
-              .filter((p) => p.subgroup === 'Estructura y Pata')
-              .map(renderParam)}
+            {pataParamIds.map((id) => renderParam(paramById[id]))}
 
+            {/* Pieza 2 y 3: Refuerzo en X */}
+            <div className="param-group-title" style={{ marginTop: 20 }}>
+              <Shield size={14} />
+              <span>2 y 3. Refuerzo en X (Abrazadera y Cruceta)</span>
+            </div>
+            {refuerzoParamIds.map((id) => renderParam(paramById[id]))}
+
+            {/* Pieza 4: Guía / Plantilla */}
             <div className="param-group-title" style={{ marginTop: 20 }}>
               <Sliders size={14} />
-              <span>Refuerzo Detallado</span>
+              <span>4. Guía / Plantilla de Esquina</span>
             </div>
-            {advancedParams
-              .filter((p) => p.subgroup === 'Refuerzo Detallado')
-              .map(renderParam)}
+            {guiaParamIds.map((id) => renderParam(paramById[id]))}
 
-            <div className="param-group-title" style={{ marginTop: 20 }}>
-              <Sliders size={14} />
-              <span>Plantilla Guía</span>
-            </div>
-            {advancedParams
-              .filter((p) => p.subgroup === 'Plantilla Guía')
-              .map(renderParam)}
-
+            {/* Rendimiento */}
             <div className="param-group-title" style={{ marginTop: 20 }}>
               <Zap size={14} />
               <span>Rendimiento de Previsualización</span>
